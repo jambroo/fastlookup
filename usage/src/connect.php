@@ -23,22 +23,24 @@ class FileEntries extends Predis\Client {
         foreach($objects as $name => $object){
             if ($object->getFilename() != '.' && $object->getFilename() != '..') {
 		$this->files[$this->i] = $name;
+                $this->set($this->i, $name);
+                $this->set($this->i."_name", $object->getFilename());
+                $this->set($this->i."_contents", file_get_contents($name));
 	        $this->i++;
             }
         }
     }
 
     function output() {
-        print_r($this->files);
+        $j = 0;
+	while ($this->get($j) !== null) {
+            echo $this->get($j)."\n";
+            echo $this->get($j."_name")."\n";
+            echo $this->get($j."_contents")."\n";
+            $j++;
+        }
     }
 }
-
-/*
-print_r($redis->set("hello_world", "Hi from php!"));
-$value = $redis->get("hello_world");
-var_dump($value);
-echo ($redis->exists("Santa Claus")) ? "true" : "false";
-*/
 
 $fe = new FileEntries(REDIS_PORT);
 $fe->crawl(BEFORE_DIR);
